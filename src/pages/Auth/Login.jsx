@@ -15,11 +15,15 @@ const Login = () => {
     setError(null);
     
     try {
+      console.log("Submitting login with:", values);
       const result = await login(values);
+      console.log("Login result:", result);
       
       if (result.success) {
-        // Redirect to the appropriate dashboard based on user type
-        navigate('/dashboard');
+        // a small delay before navigation to ensure state is updated
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 300);
       } else {
         setError(result.error || 'Login failed. Please check your credentials and try again.');
       }

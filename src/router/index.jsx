@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
-
+import { useSelector } from 'react-redux';
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
@@ -56,10 +56,19 @@ const RequireAuth = ({ children }) => {
 
 // Dashboard resolver based on user type
 const DashboardResolver = () => {
-  const userType = localStorage.getItem('user_type') || 
-                   JSON.parse(atob(localStorage.getItem('access_token')?.split('.')[1] || 'e30='))?.user_type;
+  // Get auth state from Redux
+  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const userProfile = useSelector(state => state.profile?.userProfile);
   
-  switch(userType) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Get user type from profile or user object
+  const userType = userProfile?.user_type || user?.role || 'farmer';
+
+  // Redirect based on user type
+  switch (userType) {
     case 'farmer':
       return <Navigate to="/dashboard/farmer" replace />;
     case 'buyer':
@@ -67,7 +76,7 @@ const DashboardResolver = () => {
     case 'admin':
       return <Navigate to="/dashboard/admin" replace />;
     default:
-      return <Navigate to="/login" replace />;
+      return <Navigate to="/dashboard/farmer" replace />;
   }
 };
 
@@ -96,6 +105,12 @@ const withSuspense = (Component) => (
 const router = createBrowserRouter([
   // Public routes
   {
+    element: <MainLayout />,
+    children: [
+      { path: '/', element: withSuspense(Home) },
+    ]
+  },
+  {
     element: <AuthLayout />,
     children: [
       { path: '/login', element: withSuspense(Login) },
@@ -108,7 +123,6 @@ const router = createBrowserRouter([
   {
     element: <RequireAuth><MainLayout /></RequireAuth>,
     children: [
-      { path: '/', element: <DashboardResolver /> },
       {
         path: '/dashboard',
         element: <DashboardResolver />,

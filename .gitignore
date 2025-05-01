@@ -25,3 +25,4 @@ dist-ssr
 project_structure.txt
 conceptnote.txt
 endpoints.txt
+.env

@@ -3,12 +3,21 @@ import api from '../../services/api';
 
 export const fetchUserProfile = createAsyncThunk(
   'profile/fetchUserProfile',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
+      // Add a small delay to ensure token is properly stored
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        return rejectWithValue('No authentication token found');
+      }
+      
+      // Use your API service with proper authorization
       const response = await api.get('/api/accounts/profile/');
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || 'Failed to fetch profile');
     }
   }
 );

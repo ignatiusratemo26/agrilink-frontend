@@ -6,17 +6,39 @@ export const useAuth = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, loading, error, token, user } = useSelector((state) => state.auth);
   
-  // Fix: Add a null check to prevent the TypeError
   const profile = useSelector((state) => state.profile);
   const userProfile = profile ? profile.userProfile : null;
 
   const login = async (credentials) => {
-    const resultAction = await dispatch(loginUser(credentials));
-    if (loginUser.fulfilled.match(resultAction)) {
-      await dispatch(fetchUserProfile());
-      return true;
+    try {
+      const resultAction = await dispatch(loginUser(credentials));
+      
+      if (loginUser.fulfilled.match(resultAction)) {
+        console.log("Login successful:", resultAction.payload);
+        
+        // Wait for the user profile to be fetched before returning success
+        try {
+          await dispatch(fetchUserProfile()).unwrap();
+        } catch (profileError) {
+          console.warn("Profile fetch failed but login succeeded:", profileError);
+          // Continue even if profile fetch fails - the user is still authenticated
+        }
+        
+        return { success: true };
+      } else {
+        console.error("Login failed:", resultAction.error);
+        return { 
+          success: false, 
+          error: resultAction.error?.message || 'Login failed' 
+        };
+      }
+    } catch (err) {
+      console.error("Login exception:", err);
+      return { 
+        success: false, 
+        error: 'An unexpected error occurred' 
+      };
     }
-    return false;
   };
 
   const register = async (userData) => {

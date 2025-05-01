@@ -28,13 +28,14 @@ import ForumIcon from '@mui/icons-material/Forum';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const Navbar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { logout, userProfile } = useAuth();
+  const { logout, userProfile, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -57,7 +58,8 @@ const Navbar = () => {
     setDrawerOpen(open);
   };
 
-  const menuItems = [
+  // Base menu items that are always shown
+  const baseMenuItems = [
     { text: 'Home', icon: <HomeIcon />, link: '/' },
     { text: 'Marketplace', icon: <ShoppingBasketIcon />, link: '/marketplace' },
     { text: 'Crop Recommendations', icon: <GrassIcon />, link: '/recommendations' },
@@ -65,6 +67,11 @@ const Navbar = () => {
     { text: 'Community', icon: <ForumIcon />, link: '/community' },
     { text: 'Contracts', icon: <HandshakeIcon />, link: '/contracts' },
   ];
+  
+  // Add Dashboard option if user is authenticated
+  const menuItems = isAuthenticated 
+    ? [{ text: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' }, ...baseMenuItems]
+    : baseMenuItems;
 
   return (
     <AppBar position="sticky" color="primary">
@@ -111,6 +118,7 @@ const Navbar = () => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
+          {isAuthenticated && <MenuItem onClick={() => navigate('/dashboard')}>Dashboard</MenuItem>}
           <MenuItem onClick={() => navigate('/profile')}>Profile</MenuItem>
           <MenuItem onClick={handleLogout}>
             <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
