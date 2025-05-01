@@ -29,6 +29,9 @@ const Orders = lazy(() => import('../pages/Marketplace/Orders'));
 const SoilData = lazy(() => import('../pages/Recommendations/SoilData'));
 const Recommendations = lazy(() => import('../pages/Recommendations/Recommendations'));
 
+// Contracts Pages
+const Contracts = lazy(() => import('../pages/Contracts/Contracts'));
+
 // Community Pages
 const Forums = lazy(() => import('../pages/Community/Forums'));
 const ForumThread = lazy(() => import('../pages/Community/ForumThread'));
@@ -38,6 +41,7 @@ const Courses = lazy(() => import('../pages/Learning/Courses'));
 const CourseDetail = lazy(() => import('../pages/Learning/CourseDetail'));
 
 // Profile Pages
+const UserProfile = lazy(() => import('../pages/Profile/UserProfile'));
 const FarmerProfile = lazy(() => import('../pages/Profile/FarmerProfile'));
 const BuyerProfile = lazy(() => import('../pages/Profile/BuyerProfile'));
 
@@ -80,8 +84,8 @@ const DashboardResolver = () => {
   }
 };
 
-// Profile resolver based on user type
 const ProfileResolver = () => {
+  // Try to get the user type from various sources
   const userType = localStorage.getItem('user_type') || 
                    JSON.parse(atob(localStorage.getItem('access_token')?.split('.')[1] || 'e30='))?.user_type;
   
@@ -91,16 +95,26 @@ const ProfileResolver = () => {
     case 'buyer':
       return <Navigate to="/profile/buyer" replace />;
     default:
-      return <Navigate to="/login" replace />;
+      // Instead of redirecting to login, render the UserProfile component
+      // which lets users choose which profile type to view
+      return <Navigate to="/profile/select" replace />;
   }
 };
 
 // Wrap components with Suspense for lazy loading
-const withSuspense = (Component) => (
-  <Suspense fallback={<Loader />}>
-    <Component />
-  </Suspense>
-);
+// const withSuspense = (Component) => (
+//   <Suspense fallback={<Loader />}>
+//     <Component />
+//   </Suspense>
+// );
+const withSuspense = (Component) => {
+  const SuspenseWrapped = () => (
+    <Suspense fallback={<Loader />}>
+      <Component />
+    </Suspense>
+  );
+  return <SuspenseWrapped />;
+};
 
 const router = createBrowserRouter([
   // Public routes
@@ -140,6 +154,10 @@ const router = createBrowserRouter([
         element: withSuspense(AdminDashboard),
       },
       {
+        path: '/profile/select',
+        element: withSuspense(UserProfile),
+      },
+      {
         path: '/profile',
         element: <ProfileResolver />,
       },
@@ -174,6 +192,10 @@ const router = createBrowserRouter([
       {
         path: '/recommendations/results',
         element: withSuspense(Recommendations),
+      },
+      {
+        path: '/contracts',
+        element: withSuspense(Contracts),
       },
       {
         path: '/community',
