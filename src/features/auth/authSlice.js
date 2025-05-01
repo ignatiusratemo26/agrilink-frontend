@@ -13,11 +13,37 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+// export const loginUser = createAsyncThunk(
+//   'auth/loginUser',
+//   async (credentials, { rejectWithValue }) => {
+//     try {
+//       const response = await fetch(import.meta.env.VITE_API_URL +'/api/accounts/login/', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(credentials),
+//       });
+      
+//       const data = await response.json();
+      
+//       if (!response.ok) {
+//         return rejectWithValue(data);
+//       }
+      
+      
+//       return data;
+//     } catch (error) {
+//       return rejectWithValue('Login failed. Server error.');
+//     }
+//   }
+// );
+// In the loginUser thunk, correct the token storage
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL +'/api/accounts/login/', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/accounts/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,6 +57,12 @@ export const loginUser = createAsyncThunk(
         return rejectWithValue(data);
       }
       
+      // Store the tokens in localStorage - note the correct structure!
+      if (data.tokens) {
+        localStorage.setItem('access_token', data.tokens.access);
+        localStorage.setItem('refresh_token', data.tokens.refresh);
+        localStorage.setItem('user_type', data.user_type);
+      }
       
       return data;
     } catch (error) {
@@ -38,6 +70,7 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -81,11 +114,11 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.access;
-        state.refreshToken = action.payload.refresh;
         state.isAuthenticated = true;
-        localStorage.setItem('access_token', action.payload.access);
-        localStorage.setItem('refresh_token', action.payload.refresh);
+        state.token = action.payload.tokens.access;
+        state.refreshToken = action.payload.tokens.refresh;
+        state.userType = action.payload.user_type;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

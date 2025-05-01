@@ -69,7 +69,8 @@ const DashboardResolver = () => {
   }
 
   // Get user type from profile or user object
-  const userType = userProfile?.user_type || user?.role || 'farmer';
+  const userType = localStorage.getItem('user_type') || 
+                  useSelector(state => state.auth.userType);
 
   // Redirect based on user type
   switch (userType) {
