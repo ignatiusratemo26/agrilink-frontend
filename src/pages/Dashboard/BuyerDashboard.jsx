@@ -139,7 +139,7 @@ const BuyerDashboard = () => {
                       <ListItem>
                         <ListItemText
                           primary={`Order #${order.id}`}
-                          secondary={`Total: $${order.total_amount} • ${order.items.length} items`}
+                          secondary={`Total: Ksh ${order.total_amount} • ${order.items.length} items`}
                         />
                         <Chip 
                           label={order.status} 
@@ -230,7 +230,7 @@ const BuyerDashboard = () => {
                         <CardContent>
                           <Typography variant="h6">{product.title}</Typography>
                           <Typography variant="body2" color="text.secondary">
-                            ${product.price_per_unit} per {product.unit}
+                            Ksh {product.price_per_unit} per {product.unit}
                           </Typography>
                         </CardContent>
                         <CardActions>

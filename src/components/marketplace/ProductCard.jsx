@@ -19,6 +19,8 @@ const ProductCard = ({
   elevation = 1
 }) => {
   const navigate = useNavigate();
+  
+  // Extract and transform API data properly
   const { 
     id, 
     title, 
@@ -26,11 +28,20 @@ const ProductCard = ({
     price_per_unit, 
     unit, 
     quantity_available, 
-    image, 
-    seller_name, 
-    organic,
-    rating 
+    images = [], 
+    seller = {}, 
+    average_rating,
+    is_organic
   } = product;
+  
+  // Get primary image or first image from array
+  const primaryImage = images.find(img => img.is_primary)?.image || 
+                       (images.length > 0 ? images[0].image : null);
+                       
+  // Format seller name
+  const sellerName = seller?.first_name && seller?.last_name ? 
+                     `${seller.first_name} ${seller.last_name}` : 
+                     'Unknown Seller';
 
   const handleClick = () => {
     if (showDetails) {
@@ -48,19 +59,23 @@ const ProductCard = ({
   return (
     <Card
       title={title}
-      subheader={seller_name ? `Seller: ${seller_name}` : null}
-      image={image || 'https://via.placeholder.com/300x200?text=Product'}
+      subheader={sellerName ? `Seller: ${sellerName}` : null}
+      image={primaryImage || 'https://via.placeholder.com/300x200?text=Product'}
       elevation={elevation}
       onClick={showDetails ? handleClick : undefined}
       sx={{
         position: 'relative',
         transition: 'transform 0.3s ease-in-out',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
         '&:hover': showDetails ? {
           transform: 'translateY(-5px)',
         } : {},
+        width: '100%', // Ensure consistent width
       }}
       headerProps={{
-        action: organic ? (
+        action: is_organic ? (
           <Chip 
             label="Organic" 
             color="success" 
@@ -90,7 +105,7 @@ const ProductCard = ({
         </Box>
       }
     >
-      <Box>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography 
           variant="body2" 
           color="text.secondary" 
@@ -100,18 +115,20 @@ const ProductCard = ({
             overflow: 'hidden',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 3,
+            height: '4.5em', // Fixed height for description
+            width: '100%', // Ensure consistent width
           }}
         >
           {description}
         </Typography>
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, mt: 'auto' }}>
           <Typography variant="body2" color="text.secondary">
             <strong>Available:</strong> {quantity_available} {unit}
           </Typography>
-          {rating && (
+          {average_rating && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Rating value={rating} readOnly size="small" precision={0.5} />
+              <Rating value={average_rating} readOnly size="small" precision={0.5} />
             </Box>
           )}
         </Box>

@@ -157,7 +157,7 @@ const AdminDashboard = () => {
               <Typography variant="h6">Revenue</Typography>
             </Box>
             <Typography variant="h4" component="div" sx={{ fontWeight: 'bold' }}>
-              $24,920
+              Ksh24,920
             </Typography>
             <Typography variant="body2" color="text.secondary">
               +12% since last month

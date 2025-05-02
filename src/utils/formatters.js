@@ -4,10 +4,12 @@
  * @param {string} currency - Currency code (default: USD)
  * @returns {string} - Formatted currency string
  */
-export const formatCurrency = (amount, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount, currency = 'KES') => {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(amount);
   };
   

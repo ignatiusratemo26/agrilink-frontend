@@ -165,7 +165,7 @@ const ProductForm = ({ onSubmit, loading, error, initialValues }) => {
               helperText={formik.touched.price_per_unit && formik.errors.price_per_unit}
               disabled={loading}
               InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                startAdornment: <InputAdornment position="start">Ksh </InputAdornment>,
               }}
             />
           </Grid>

@@ -127,6 +127,16 @@ const SoilDataInput = ({
                             {location.location_name}
                           </Typography>
                           <Grid container spacing={1} sx={{ mt: 1 }}>
+                          <Grid item xs={12}>
+                              <Typography variant="body2" color="text.secondary">
+                                Location Coordinates:
+                              </Typography>
+                              <Typography variant="body1">
+                                {selectedLocation 
+                                  ? `${selectedLocation.latitude || 'N/A'}, ${selectedLocation.longitude || 'N/A'}`
+                                  : `${formData.latitude || 'N/A'}, ${formData.longitude || 'N/A'}`}
+                              </Typography>
+                            </Grid>
                             <Grid item xs={6}>
                               <Typography variant="caption" color="text.secondary">
                                 Nitrogen
