@@ -110,3 +110,28 @@ export const formatCurrency = (amount, currency = 'KES') => {
         return value.toString();
     }
   };
+
+
+// export const formatSoilParameter = (key, value) => {
+//   if (value === null || value === undefined) return 'N/A';
+
+//   switch (key) {
+//     case 'nitrogen':
+//     case 'phosphorus':
+//     case 'potassium':
+//       return `${value} ppm`;
+//     case 'ph_level':
+//       return `${value}`;
+//     case 'rainfall':
+//       return `${value} mm`;
+//     case 'temperature':
+//       return `${value}°C`;
+//     case 'humidity':
+//       return `${value}%`;
+//     case 'latitude':
+//     case 'longitude':
+//       return `${value}°`;
+//     default:
+//       return value.toString();
+//   }
+// };

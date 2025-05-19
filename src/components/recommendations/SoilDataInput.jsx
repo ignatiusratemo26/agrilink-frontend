@@ -29,12 +29,30 @@ const SoilDataInput = ({
     potassium: '',
     ph_level: '',
     rainfall: '',
-    temperature: ''
+    temperature: '',
+    humidity: '',
+    latitude: '',
+    longitude: ''
   });
 
   // Handle selection of a saved location
   const handleLocationSelect = (location) => {
     setSelectedLocation(location);
+    // Set formData from the selected location to pre-fill the form
+    setFormData({
+      id: location.id,
+      location_name: location.location_name,
+      nitrogen: location.nitrogen,
+      phosphorus: location.phosphorus,
+      potassium: location.potassium,
+      ph_level: location.ph_level,
+      rainfall: location.rainfall,
+      temperature: location.temperature,
+      humidity: location.humidity || '',
+      latitude: location.latitude || '',
+      longitude: location.longitude || ''
+    });
+    // Now advance to Step 1 so they can view/edit the data
     setActiveStep(1);
   };
 
@@ -47,8 +65,14 @@ const SoilDataInput = ({
   // Handle final submission
   const handleSubmit = () => {
     if (selectedLocation) {
-      onSubmit(selectedLocation);
+      // Use the formData which might have been edited by the user
+      const dataToSubmit = {
+        ...formData,
+        id: selectedLocation.id // Preserve the ID
+      };
+      onSubmit(dataToSubmit);
     } else {
+      // This is new data
       onSubmit(formData);
     }
   };
@@ -56,8 +80,9 @@ const SoilDataInput = ({
   // Step back to previous step
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
-    if (activeStep === 1) {
-      setSelectedLocation(null);
+    if (activeStep === 1 && selectedLocation) {
+      // Don't reset the selected location when going back from the form
+      // This allows the user to edit and continue
     }
   };
 
@@ -72,8 +97,16 @@ const SoilDataInput = ({
       potassium: '',
       ph_level: '',
       rainfall: '',
-      temperature: ''
+      temperature: '',
+      humidity: '',
+      latitude: '',
+      longitude: ''
     });
+  };
+
+  // This should actually go to Step 2
+  const handleContinueWithSelected = () => {
+    setActiveStep(2);
   };
 
   return (
@@ -116,9 +149,9 @@ const SoilDataInput = ({
                             '&:hover': { 
                               boxShadow: 6,
                               borderColor: 'primary.main',
-                              borderStyle: location.id === selectedLocation?.id ? 'solid' : 'none'
+                              borderStyle: selectedLocation?.id === location.id ? 'solid' : 'none'
                             },
-                            border: location.id === selectedLocation?.id ? 2 : 0,
+                            border: selectedLocation?.id === location.id ? 2 : 0,
                             borderColor: 'primary.main'
                           }}
                           onClick={() => handleLocationSelect(location)}
@@ -127,14 +160,12 @@ const SoilDataInput = ({
                             {location.location_name}
                           </Typography>
                           <Grid container spacing={1} sx={{ mt: 1 }}>
-                          <Grid item xs={12}>
+                            <Grid item xs={12}>
                               <Typography variant="body2" color="text.secondary">
                                 Location Coordinates:
                               </Typography>
                               <Typography variant="body1">
-                                {selectedLocation 
-                                  ? `${selectedLocation.latitude || 'N/A'}, ${selectedLocation.longitude || 'N/A'}`
-                                  : `${formData.latitude || 'N/A'}, ${formData.longitude || 'N/A'}`}
+                                {location.latitude ? `${location.latitude}, ${location.longitude}` : 'N/A'}
                               </Typography>
                             </Grid>
                             <Grid item xs={6}>
@@ -183,7 +214,23 @@ const SoilDataInput = ({
                   <Button 
                     variant="contained" 
                     color="primary"
-                    onClick={() => setActiveStep(1)}
+                    onClick={() => {
+                      // Clear any selected location when creating new
+                      setSelectedLocation(null);
+                      setFormData({
+                        location_name: '',
+                        nitrogen: '',
+                        phosphorus: '',
+                        potassium: '',
+                        ph_level: '',
+                        rainfall: '',
+                        temperature: '',
+                        humidity: '',
+                        latitude: '',
+                        longitude: ''
+                      });
+                      setActiveStep(1);
+                    }}
                   >
                     Enter New Soil Data
                   </Button>
@@ -193,7 +240,7 @@ const SoilDataInput = ({
                       sx={{ ml: 1 }} 
                       variant="outlined" 
                       color="primary"
-                      onClick={() => setActiveStep(2)}
+                      onClick={handleContinueWithSelected}
                     >
                       Continue with Selected
                     </Button>
@@ -206,7 +253,7 @@ const SoilDataInput = ({
         
         <Step>
           <StepLabel>
-            Enter Soil Data
+            {selectedLocation ? "Edit Soil Data" : "Enter Soil Data"}
           </StepLabel>
           <StepContent>
             <SoilDataForm
@@ -237,15 +284,23 @@ const SoilDataInput = ({
             
             <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
               <Typography variant="subtitle1" fontWeight="bold">
-                {selectedLocation ? selectedLocation.location_name : formData.location_name}
+                {formData.location_name}
               </Typography>
               <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <Typography variant="body2" color="text.secondary">
+                    Location Coordinates:
+                  </Typography>
+                  <Typography variant="body1">
+                    {formData.latitude ? `${formData.latitude}, ${formData.longitude}` : 'N/A'}
+                  </Typography>
+                </Grid>
                 <Grid item xs={6} sm={4}>
                   <Typography variant="body2" color="text.secondary">
                     Nitrogen (N):
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.nitrogen : formData.nitrogen} ppm
+                    {formData.nitrogen} ppm
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
@@ -253,7 +308,7 @@ const SoilDataInput = ({
                     Phosphorus (P):
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.phosphorus : formData.phosphorus} ppm
+                    {formData.phosphorus} ppm
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
@@ -261,7 +316,7 @@ const SoilDataInput = ({
                     Potassium (K):
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.potassium : formData.potassium} ppm
+                    {formData.potassium} ppm
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
@@ -269,7 +324,7 @@ const SoilDataInput = ({
                     pH Level:
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.ph_level : formData.ph_level}
+                    {formData.ph_level}
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
@@ -277,7 +332,7 @@ const SoilDataInput = ({
                     Rainfall:
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.rainfall : formData.rainfall} mm
+                    {formData.rainfall} mm
                   </Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
@@ -285,7 +340,15 @@ const SoilDataInput = ({
                     Temperature:
                   </Typography>
                   <Typography variant="body1">
-                    {selectedLocation ? selectedLocation.temperature : formData.temperature} °C
+                    {formData.temperature} °C
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} sm={4}>
+                  <Typography variant="body2" color="text.secondary">
+                    Humidity:
+                  </Typography>
+                  <Typography variant="body1">
+                    {formData.humidity || 'N/A'} %
                   </Typography>
                 </Grid>
               </Grid>

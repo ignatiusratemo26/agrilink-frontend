@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -6,167 +6,154 @@ import {
   Grid, 
   Paper,
   Button,
-  Alert
+  Alert,
+  Dialog,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import CropRecommendationCard from '../../components/recommendations/CropRecommendationCard';
 import Loader from '../../components/common/Loader';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DownloadIcon from '@mui/icons-material/Download';
+import CropRecommendationCard from '../../components/recommendations/CropRecommendationCard';
+import SimilarCropsCard from '../../components/recommendations/SimilarCropsCard';
+import SoilConditionSummary from '../../components/recommendations/SoilConditionSummary';
+import LocationWeatherCard from '../../components/recommendations/LocationWeatherCard';
+import RecommendationHistoryCard from '../../components/recommendations/RecommendationHistoryCard';
 import { useCreateFarmerOfferMutation } from '../../features/contracts/contractsApi';
+import FarmingOfferForm from '../../components/forms/FarmingOfferForm';
 
 const Recommendations = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  
   const [recommendation, setRecommendation] = useState(null);
   const [soilData, setSoilData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCrop, setSelectedCrop] = useState(null);
+  const [offerDialogOpen, setOfferDialogOpen] = useState(false);
   
   const [createFarmerOffer, { isLoading: isCreatingOffer }] = useCreateFarmerOfferMutation();
   
   useEffect(() => {
-    if (!location.state?.recommendation) {
-      setError('No recommendation data found. Please submit soil data first.');
-    } else {
+    if (location.state?.recommendation) {
       setRecommendation(location.state.recommendation);
-      setSoilData(location.state.soilData);
-      setIsLoading(false);
+      if (location.state.soilData) {
+        setSoilData(location.state.soilData);
+      }
+    } else {
+      setError('No recommendation data found. Please return to the soil data page.');
     }
   }, [location.state]);
-  
-  const handleCreateOffer = async (crop) => {
+
+  const handleCreateOffer = (crop) => {
+    setSelectedCrop(crop);
+    setOfferDialogOpen(true);
+  };
+
+  const handleSubmitOffer = async (offerData) => {
     try {
-      // In a real app, we'd open a form to enter more details
-      // For this demo, we'll just create a basic offer
-      const offerData = {
-        crop: crop.id,
-        title: `${crop.name} Supply`,
-        quantity_available: 100,
-        unit: 'kg',
-        price_per_unit: 45.00,
-        harvest_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-      };
-      
       await createFarmerOffer(offerData).unwrap();
-      navigate('/contracts');
-    } catch (err) {
-      console.error('Failed to create offer:', err);
+      setOfferDialogOpen(false);
+      navigate('/contracts?tab=1');
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      // Don't close dialog, let user fix errors
     }
   };
-  
-  const handleExport = () => {
-    // In a real app, this would generate and download a PDF report
-    alert('This feature would generate a PDF report with the recommendation details.');
+
+  const handleCloseDialog = () => {
+    setOfferDialogOpen(false);
   };
-  
-  if (isLoading) {
-    return <Loader message="Processing your soil data..." />;
-  }
+
+  if (isLoading) return <Loader />;
   
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/recommendations')}
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+        <Button 
+          variant="contained" 
+          onClick={() => navigate('/recommendations/soil-data')}
+          sx={{ mt: 2 }}
         >
-          Enter Soil Data
+          Go back to Soil Data
         </Button>
       </Container>
     );
   }
   
-  if (!recommendation) {
-    return <Loader />;
-  }
+  if (!recommendation) return <Loader />;
   
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4">Crop Recommendations</Typography>
-          <Box>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate('/recommendations')}
-              sx={{ mr: 2 }}
-            >
-              Back
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<DownloadIcon />}
-              onClick={handleExport}
-            >
-              Export Report
-            </Button>
-          </Box>
-        </Box>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Crop Recommendations
+      </Typography>
+      
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 0, height: '100%', overflow: 'hidden' }}>
+            {recommendation && (
+              <CropRecommendationCard 
+                recommendation={recommendation}
+                soilData={soilData}
+                onCreateOffer={handleCreateOffer}
+              />
+            )}
+          </Paper>
+        </Grid>
         
-        <Typography variant="body1" paragraph>
-          Based on your soil data, here's our recommendation for the best crops to plant:
-        </Typography>
+        <Grid item xs={12} md={4}>
+          <Grid container spacing={3} direction="column">
+            <Grid item>
+              <SoilConditionSummary soilData={soilData} />
+            </Grid>
+            <Grid item>
+              <LocationWeatherCard 
+                location={soilData?.location_name || 'Unknown'} 
+                coordinates={{
+                  lat: soilData?.latitude,
+                  lng: soilData?.longitude
+                }}
+                temperature={soilData?.temperature}
+                rainfall={soilData?.rainfall}
+                humidity={soilData?.humidity}
+              />
+            </Grid>
+          </Grid>
+        </Grid>
         
-        <Grid container spacing={3}>
-          {/* Primary recommendation */}
-          <Grid item xs={12} md={6}>
-            <CropRecommendationCard
-              recommendation={recommendation}
-              soilData={soilData}
-              onCreateOffer={handleCreateOffer}
+        {recommendation?.similar_crops?.length > 0 && (
+          <Grid item xs={12}>
+            <SimilarCropsCard 
+              crops={recommendation.similar_crops} 
+              onCropSelect={handleCreateOffer}
             />
           </Grid>
-          
-          {/* Alternative recommendations would go here in a real app */}
-          {recommendation.alternative_crops && recommendation.alternative_crops.length > 0 && (
-            recommendation.alternative_crops.map((altCrop, index) => (
-              <Grid item xs={12} md={6} key={index}>
-                <CropRecommendationCard
-                  recommendation={{
-                    ...recommendation,
-                    recommended_crop: altCrop,
-                    confidence_score: recommendation.alternative_scores[index] || 0.65
-                  }}
-                  soilData={soilData}
-                  onCreateOffer={handleCreateOffer}
-                />
-              </Grid>
-            ))
-          )}
+        )}
+        
+        <Grid item xs={12}>
+          <RecommendationHistoryCard />
         </Grid>
-      </Box>
+      </Grid>
       
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Next Steps
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Based on your soil analysis, we've identified optimal crops for your conditions. 
-          You can create a farming offer to connect with potential buyers or explore our marketplace 
-          for seeds and agricultural inputs to start implementing these recommendations.
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <Button 
-            variant="contained" 
-            color="primary"
-            onClick={() => navigate('/marketplace')}
-          >
-            Visit Marketplace
-          </Button>
-          <Button 
-            variant="outlined"
-            onClick={() => navigate('/learning')}
-          >
-            Learning Resources
-          </Button>
-        </Box>
-      </Paper>
+      {/* Farming Offer Dialog */}
+      <Dialog
+        fullScreen={fullScreen}
+        open={offerDialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <FarmingOfferForm
+          onSubmit={handleSubmitOffer}
+          isSubmitting={isCreatingOffer}
+          cropData={selectedCrop}
+          onCancel={handleCloseDialog}
+        />
+      </Dialog>
     </Container>
   );
 };

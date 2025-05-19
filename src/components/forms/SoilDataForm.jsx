@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Box, 
@@ -47,6 +46,7 @@ const SoilDataForm = ({ onSubmit, initialValues = {}, isSubmitting }) => {
       ph_level: '',
       rainfall: '',
       temperature: '',
+      humidity: '', // Added the humidity field
       latitude: initialValues.latitude || '',
       longitude: initialValues.longitude || '',
       ...initialValues,
@@ -65,6 +65,7 @@ const SoilDataForm = ({ onSubmit, initialValues = {}, isSubmitting }) => {
         .max(10),
       rainfall: Yup.number().required('Rainfall is required').min(0),
       temperature: Yup.number().required('Temperature is required'),
+      humidity: Yup.number().required('Humidity is required').min(0).max(100), // Added validation
       latitude: Yup.number()
         .required('Latitude is required')
         .min(-90, 'Latitude must be >= -90')
@@ -310,6 +311,22 @@ const SoilDataForm = ({ onSubmit, initialValues = {}, isSubmitting }) => {
             onBlur={formik.handleBlur}
             error={formik.touched.temperature && formik.errors.temperature}
             helperText={formik.touched.temperature && formik.errors.temperature}
+          />
+        </Grid>
+        {/* Added humidity field */}
+        <Grid item xs={12} sm={6}>
+          <InputField
+            name="humidity"
+            label="Humidity (%)"
+            type="number"
+            value={formik.values.humidity}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.humidity && formik.errors.humidity}
+            helperText={formik.touched.humidity && formik.errors.humidity}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
         </Grid>
       </Grid>

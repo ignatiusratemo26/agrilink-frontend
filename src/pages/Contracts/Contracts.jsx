@@ -17,9 +17,14 @@ import {
 } from '../../features/contracts/contractsApi';
 import Loader from '../../components/common/Loader';
 import AddIcon from '@mui/icons-material/Add';
+import { useLocation } from 'react-router-dom';
 
 const Contracts = () => {
-  const [tabValue, setTabValue] = useState(0);
+  const location = useLocation();
+  // Get tab from URL query parameter or default to 0
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = parseInt(queryParams.get('tab') || '0', 10);
+  const [tabValue, setTabValue] = useState(initialTab);
   const { data: contractRequests, isLoading: contractsLoading, error: contractsError } = useGetContractRequestsQuery();
   const { data: farmerOffers, isLoading: offersLoading, error: offersError } = useGetFarmerOffersQuery();
   

@@ -10,6 +10,7 @@ import { contractsApi } from '../features/contracts/contractsApi';
 import { messagesApi } from '../features/messages/messagesApi';
 import { communityApi } from '../features/community/communityApi';
 import { learningApi } from '../features/learning/learningApi';
+import { recommendationsApi } from '../features/recommendations/recommendationsApi';
 
 // Configure the Redux store
 const store = configureStore({
@@ -22,6 +23,7 @@ const store = configureStore({
     [contractsApi.reducerPath]: contractsApi.reducer,
     [messagesApi.reducerPath]: messagesApi.reducer,
     [communityApi.reducerPath]: communityApi.reducer,
+    [recommendationsApi.reducerPath]: recommendationsApi.reducer,
     [learningApi.reducerPath]: learningApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -34,6 +36,7 @@ const store = configureStore({
       .concat(messagesApi.middleware)
       .concat(communityApi.middleware)
       .concat(learningApi.middleware)
+      .concat(recommendationsApi.middleware)
       .concat(errorMiddleware),
 });
 
