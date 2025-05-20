@@ -8,6 +8,8 @@ import DashboardLayout from '../layouts/DashboardLayout';
 
 // Common components
 import Loader from '../components/common/Loader';
+import Cart from '../pages/Marketplace/Cart';
+import Checkout from '../pages/Marketplace/Checkout';
 
 // Auth Pages
 const Login = lazy(() => import('../pages/Auth/Login'));
@@ -34,7 +36,7 @@ const Contracts = lazy(() => import('../pages/Contracts/Contracts'));
 
 // Community Pages
 const Forums = lazy(() => import('../pages/Community/Forums'));
-const ForumThread = lazy(() => import('../pages/Community/ForumThread'));
+const DiscussionDetail = lazy(() => import('../pages/Community/DiscussionDetail'));
 
 // Learning Pages
 const Courses = lazy(() => import('../pages/Learning/Courses'));
@@ -51,8 +53,9 @@ const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Auth guard component
 const RequireAuth = ({ children }) => {
-  const token = localStorage.getItem('access_token');
-  if (!token) {
+  const { isAuthenticated } = useSelector(state => state.auth);
+  
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -187,6 +190,14 @@ const router = createBrowserRouter([
         element: withSuspense(Orders),
       },
       {
+        path: '/marketplace/checkout',
+        element: withSuspense(Checkout),
+      },
+      {
+        path: '/marketplace/cart',
+        element: withSuspense(Cart),
+      },
+      {
         path: '/recommendations',
         element: withSuspense(SoilData),
       },
@@ -197,14 +208,13 @@ const router = createBrowserRouter([
       {
         path: '/contracts',
         element: withSuspense(Contracts),
-      },
-      {
+      },      {
         path: '/community',
         element: withSuspense(Forums),
       },
       {
-        path: '/community/thread/:id',
-        element: withSuspense(ForumThread),
+        path: '/community/discussion/:id',
+        element: withSuspense(DiscussionDetail),
       },
       {
         path: '/learning',

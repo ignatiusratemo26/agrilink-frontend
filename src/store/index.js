@@ -11,6 +11,7 @@ import { messagesApi } from '../features/messages/messagesApi';
 import { communityApi } from '../features/community/communityApi';
 import { learningApi } from '../features/learning/learningApi';
 import { recommendationsApi } from '../features/recommendations/recommendationsApi';
+import cartReducer from '../features/cart/cartSlice';
 
 // Configure the Redux store
 const store = configureStore({
@@ -25,6 +26,7 @@ const store = configureStore({
     [communityApi.reducerPath]: communityApi.reducer,
     [recommendationsApi.reducerPath]: recommendationsApi.reducer,
     [learningApi.reducerPath]: learningApi.reducer,
+    cart: cartReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

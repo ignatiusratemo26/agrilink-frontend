@@ -13,42 +13,45 @@ export const communityApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Forums', 'ForumThreads', 'Comments'],
+  tagTypes: ['Topics', 'Discussions', 'Comments', 'Groups'],
   endpoints: (builder) => ({
-    getForums: builder.query({
-      query: () => '/api/community/forums/',
-      providesTags: ['Forums'],
+    getTopics: builder.query({
+      query: () => '/api/community/topics/',
+      providesTags: ['Topics'],
     }),
-    getForumThreads: builder.query({
-      query: (forumId) => `/api/community/forums/${forumId}/threads/`,
-      providesTags: (result, error, forumId) => [
-        { type: 'ForumThreads', id: forumId },
-        'ForumThreads',
+    getDiscussions: builder.query({
+      query: (topicId) => `/api/community/discussions/?topic=${topicId}`,
+      providesTags: (result, error, topicId) => [
+        { type: 'Discussions', id: topicId },
+        'Discussions',
       ],
     }),
-    getThreadComments: builder.query({
-      query: (threadId) => `/api/community/threads/${threadId}/comments/`,
-      providesTags: (result, error, threadId) => [
-        { type: 'Comments', id: threadId },
+    getDiscussionComments: builder.query({
+      query: (discussionId) => `/api/community/comments/?discussion=${discussionId}`,
+      providesTags: (result, error, discussionId) => [        { type: 'Comments', id: discussionId },
         'Comments',
       ],
     }),
-    createThread: builder.mutation({
-      query: (threadData) => ({
-        url: '/api/community/threads/',
+    getGroups: builder.query({
+      query: () => '/api/community/groups/',
+      providesTags: ['Groups'],
+    }),
+    createDiscussion: builder.mutation({
+      query: (discussionData) => ({
+        url: '/api/community/discussions/',
         method: 'POST',
-        body: threadData,
+        body: discussionData,
       }),
-      invalidatesTags: ['ForumThreads'],
+      invalidatesTags: ['Discussions'],
     }),
     createComment: builder.mutation({
-      query: ({ threadId, ...commentData }) => ({
-        url: `/api/community/threads/${threadId}/comments/`,
+      query: (commentData) => ({
+        url: '/api/community/comments/',
         method: 'POST',
         body: commentData,
       }),
-      invalidatesTags: (result, error, { threadId }) => [
-        { type: 'Comments', id: threadId },
+      invalidatesTags: (result, error, { discussion }) => [
+        { type: 'Comments', id: discussion },
         'Comments',
       ],
     }),
@@ -56,9 +59,10 @@ export const communityApi = createApi({
 });
 
 export const {
-  useGetForumsQuery,
-  useGetForumThreadsQuery,
-  useGetThreadCommentsQuery,
-  useCreateThreadMutation,
+  useGetTopicsQuery,
+  useGetDiscussionsQuery,
+  useGetDiscussionCommentsQuery,
+  useGetGroupsQuery,
+  useCreateDiscussionMutation,
   useCreateCommentMutation,
 } = communityApi;

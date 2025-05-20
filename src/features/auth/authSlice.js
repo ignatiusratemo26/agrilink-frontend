@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../services/api';
+import { isTokenExpired, removeTokens, storeTokens } from '../../utils/tokenHelpers';
 
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
@@ -56,11 +57,9 @@ export const loginUser = createAsyncThunk(
       if (!response.ok) {
         return rejectWithValue(data);
       }
-      
-      // Store the tokens in localStorage - note the correct structure!
+        // Store the tokens in localStorage - note the correct structure!
       if (data.tokens) {
-        localStorage.setItem('access_token', data.tokens.access);
-        localStorage.setItem('refresh_token', data.tokens.refresh);
+        storeTokens(data.tokens.access, data.tokens.refresh);
         localStorage.setItem('user_type', data.user_type);
       }
       
@@ -72,24 +71,42 @@ export const loginUser = createAsyncThunk(
 );
 
 
+
+const accessToken = localStorage.getItem('access_token');
+const refreshToken = localStorage.getItem('refresh_token');
+const tokenValid = accessToken && !isTokenExpired();
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
-    token: localStorage.getItem('access_token') || null,
-    refreshToken: localStorage.getItem('refresh_token') || null,
-    isAuthenticated: !!localStorage.getItem('access_token'),
+    token: tokenValid ? accessToken : null,
+    refreshToken: tokenValid ? refreshToken : null,
+    isAuthenticated: tokenValid,
     loading: false,
     error: null,
-  },
-  reducers: {
+  },  reducers: {
     logout: (state) => {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      removeTokens();
+      localStorage.removeItem('user_type');
       state.user = null;
       state.token = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+    },
+    checkTokenValidity: (state) => {
+      const accessToken = localStorage.getItem('access_token');
+      const tokenIsValid = accessToken && !isTokenExpired();
+      state.isAuthenticated = tokenIsValid;
+      state.token = tokenIsValid ? accessToken : null;
+      state.refreshToken = tokenIsValid ? localStorage.getItem('refresh_token') : null;
+      
+      if (!tokenIsValid && state.token) {
+        // If token exists but is invalid, clean up
+        removeTokens();
+        state.token = null;
+        state.refreshToken = null;
+      }
     },
     clearError: (state) => {
       state.error = null;
@@ -123,9 +140,8 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed";
-      });
-  },
+      });  },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, checkTokenValidity, clearError } = authSlice.actions;
 export default authSlice.reducer;

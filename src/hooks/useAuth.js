@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { loginUser, registerUser, logout } from '../features/auth/authSlice';
+import { loginUser, registerUser, logout, checkTokenValidity } from '../features/auth/authSlice';
 import { fetchUserProfile } from '../features/profile/profileSlice';
+import { useEffect } from 'react';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -8,6 +9,11 @@ export const useAuth = () => {
   
   const profile = useSelector((state) => state.profile);
   const userProfile = profile ? profile.userProfile : null;
+  
+  // Check token validity on hook initialization
+  useEffect(() => {
+    dispatch(checkTokenValidity());
+  }, [dispatch]);
 
   const login = async (credentials) => {
     try {

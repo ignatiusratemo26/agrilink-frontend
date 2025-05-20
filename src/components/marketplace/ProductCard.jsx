@@ -119,7 +119,7 @@ const ProductCard = ({
             width: '100%', // Ensure consistent width
           }}
         >
-          {description}
+          {description.length > 30 ? `${description.slice(0,30)}...` : description}
         </Typography>
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, mt: 'auto' }}>

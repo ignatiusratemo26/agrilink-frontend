@@ -166,7 +166,7 @@ const Products = () => {
                     secondary={
                       <Box>
                         <Typography variant="body2">
-                          ${item.price_per_unit} per {item.unit}
+                          Ksh. {item.price_per_unit} per {item.unit}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                           <Button 
@@ -197,7 +197,7 @@ const Products = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="subtitle1">Total</Typography>
               <Typography variant="subtitle1" fontWeight="bold">
-                ${cartItems.reduce((total, item) => total + (item.price_per_unit * item.quantity), 0).toFixed(2)}
+                Ksh. {cartItems.reduce((total, item) => total + (item.price_per_unit * item.quantity), 0).toFixed(2)}
               </Typography>
             </Box>
             

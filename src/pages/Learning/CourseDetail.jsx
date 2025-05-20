@@ -20,77 +20,35 @@ import {
   AccordionDetails,
   Alert,
   Avatar,
-  LinearProgress,
-  Card,
-  CardContent
+  Chip,
+  Stack,
 } from '@mui/material';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import {
-  useGetCourseByIdQuery,
-  useGetCourseLessonsQuery,
-  useEnrollInCourseMutation
-} from '../../features/learning/learningApi';
+import { useGetCourseByIdQuery } from '../../features/learning/learningApi';
 import Loader from '../../components/common/Loader';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import ArticleIcon from '@mui/icons-material/Article';
-import QuizIcon from '@mui/icons-material/Quiz';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 const CourseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
-  const [currentLessonId, setCurrentLessonId] = useState(null);
   
   const { 
     data: course, 
-    isLoading: courseLoading, 
-    error: courseError 
+    isLoading, 
+    error 
   } = useGetCourseByIdQuery(id);
-  
-  const {
-    data: lessons,
-    isLoading: lessonsLoading,
-    error: lessonsError
-  } = useGetCourseLessonsQuery(id);
-
-  const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation();
-
-  const handleEnroll = async () => {
-    try {
-      await enrollInCourse(id).unwrap();
-      // No need to navigate, we're already on the course page
-      // Just reload the data
-      window.location.reload();
-    } catch (err) {
-      console.error('Failed to enroll in course:', err);
-    }
-  };
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
-
-  const handleLessonSelect = (lessonId) => {
-    setCurrentLessonId(lessonId);
-  };
-
-  const isLoading = courseLoading || lessonsLoading;
-  const error = courseError || lessonsError;
-  
-  const currentLesson = currentLessonId && lessons ? 
-    lessons.find(lesson => lesson.id === currentLessonId) : 
-    lessons && lessons.length > 0 ? lessons[0] : null;
-
-  // Calculate progress
-  const progress = course && course.is_enrolled ? 
-    (course.completed_lessons / course.lessons_count) * 100 : 0;
 
   if (isLoading) {
     return <Loader message="Loading course details..." />;
@@ -142,370 +100,400 @@ const CourseDetail = () => {
         </Breadcrumbs>
 
         {/* Course Header */}
-        <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Paper 
+          elevation={0}
+          sx={{ 
+            p: 4, 
+            mb: 3, 
+            borderRadius: 3,
+            background: 'linear-gradient(45deg, #f3f9ff 0%, #ffffff 100%)',
+            border: '1px solid #e0e0e0'
+          }}
+        >
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: '#1a3a5f' }}>
                 {course.title}
               </Typography>
-              <Typography variant="body1" paragraph>
+              
+              <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                {course.is_free && (
+                  <Chip 
+                    label="Free" 
+                    color="success" 
+                    size="small"
+                    sx={{ fontWeight: 500 }}
+                  />
+                )}
+                {course.is_featured && (
+                  <Chip 
+                    label="Featured" 
+                    color="primary" 
+                    size="small"
+                    sx={{ fontWeight: 500 }}
+                  />
+                )}
+              </Stack>
+              
+              <Typography variant="body1" paragraph sx={{ color: '#546e7a' }}>
                 {course.description}
               </Typography>
               
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
+              <Stack direction="row" spacing={3} sx={{ flexWrap: 'wrap', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <SchoolIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Typography variant="body2" color="text.secondary">
+                  <SchoolIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="body2" fontWeight={500}>
                     {course.level || 'Beginner'}
                   </Typography>
                 </Box>
                 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {course.duration || '2 hours'} • {course.lessons_count || 4} lessons
+                  <AccessTimeIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="body2" fontWeight={500}>
+                    {course.duration ? `${Math.round(course.duration / 60)} hrs` : '2 hrs'} • {course.total_lessons || 0} lessons
                   </Typography>
                 </Box>
                 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <PersonIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {course.students_count || 0} students enrolled
-                  </Typography>
-                </Box>
-              </Box>
-              
-              {course.is_enrolled ? (
-                <Box sx={{ width: '100%', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" sx={{ mr: 1 }}>
-                      Your progress: {Math.round(progress)}%
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ({course.completed_lessons || 0}/{course.lessons_count || 0} lessons)
+                {course.instructor && (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <PersonIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
+                    <Typography variant="body2" fontWeight={500}>
+                      {course.instructor.first_name} {course.instructor.last_name}
                     </Typography>
                   </Box>
-                  <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
-                </Box>
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={handleEnroll}
-                  disabled={isEnrolling}
-                  sx={{ mt: 2 }}
-                >
-                  {isEnrolling ? 'Enrolling...' : 'Enroll in This Course'}
-                </Button>
+                )}
+              </Stack>
+              
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ 
+                  px: 4, 
+                  py: 1.2, 
+                  fontWeight: 600, 
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}
+              >
+                {course.is_enrolled ? 'Continue Learning' : course.is_free ? 'Enroll for Free' : 'Enroll Now'}
+              </Button>
+              
+              {!course.is_free && !course.is_enrolled && (
+                <Typography variant="h6" color="primary.main" sx={{ mt: 2, fontWeight: 600 }}>
+                  KSh {parseFloat(course.price || 0).toLocaleString()}
+                </Typography>
               )}
             </Grid>
             
             <Grid item xs={12} md={4}>
-              <Box
-                component="img"
-                src={course.image || `https://source.unsplash.com/random/400x300/?farming,${course.id}`}
-                alt={course.title}
-                sx={{
-                  width: '100%',
-                  borderRadius: 2,
-                  boxShadow: 2,
-                  maxHeight: 200,
-                  objectFit: 'cover'
-                }}
-              />
+              {course.instructor && (
+                <Paper 
+                  elevation={0} 
+                  sx={{ 
+                    p: 3, 
+                    borderRadius: 2, 
+                    border: '1px solid #e0e0e0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center'
+                  }}
+                >
+                  <Avatar 
+                    sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      mb: 2,
+                      bgcolor: 'primary.main',
+                      fontSize: '1.75rem'
+                    }}
+                  >
+                    {course.instructor.first_name.charAt(0)}
+                  </Avatar>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="h6" sx={{ mb: 0.5 }}>
+                      {course.instructor.first_name} {course.instructor.last_name}
+                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <VerifiedIcon color="primary" fontSize="small" sx={{ mr: 0.5 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {course.instructor.user_type === 'expert' ? 'Agricultural Expert' : 'Instructor'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Typography variant="body2" color="text.secondary">
+                    Expert in sustainable farming practices with years of experience in agricultural education.
+                  </Typography>
+                </Paper>
+              )}
             </Grid>
           </Grid>
         </Paper>
 
         {/* Course Content */}
-        {course.is_enrolled ? (
-          <Grid container spacing={3}>
-            {/* Left sidebar - Lessons list */}
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
-                <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
-                  <Typography variant="h6">Course Content</Typography>
-                </Box>
-                <List sx={{ p: 0 }}>
-                  {lessons ? (
-                    lessons.map((lesson, index) => (
-                      <React.Fragment key={lesson.id}>
-                        <ListItem
-                          button
-                          selected={currentLessonId === lesson.id}
-                          onClick={() => handleLessonSelect(lesson.id)}
-                        >
-                          <ListItemIcon>
-                            {lesson.type === 'video' && <PlayCircleFilledIcon />}
-                            {lesson.type === 'article' && <ArticleIcon />}
-                            {lesson.type === 'quiz' && <QuizIcon />}
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={`${index + 1}. ${lesson.title}`}
-                            secondary={`${lesson.duration || '10 min'} • ${lesson.is_completed ? 'Completed' : 'Not completed'}`}
-                          />
-                        </ListItem>
-                        {index < lessons.length - 1 && <Divider />}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <ListItem>
-                      <ListItemText primary="No lessons available yet" />
-                    </ListItem>
-                  )}
-                </List>
-              </Paper>
-            </Grid>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            borderRadius: 3,
+            overflow: 'hidden',
+            border: '1px solid #e0e0e0'
+          }}
+        >
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3 }}>
+            <Tabs 
+              value={tabValue} 
+              onChange={handleTabChange}
+              aria-label="course tabs"
+              sx={{
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  py: 2,
+                }
+              }}
+            >
+              <Tab label="Course Content" />
+              <Tab label="Overview" />
+              <Tab label="Instructor" />
+            </Tabs>
+          </Box>
+          
+          {/* Course Content Tab */}
+          <Box hidden={tabValue !== 0} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+              {course.total_lessons || (course.modules?.reduce((total, module) => total + (module.lessons?.length || 0), 0) || 0)} Lessons 
+              • {course.modules?.length || 0} Modules
+            </Typography>
             
-            {/* Main content area - Lesson */}
-            <Grid item xs={12} md={8}>
-              <Paper sx={{ p: 3, borderRadius: 2 }}>
-                {currentLesson ? (
-                  <>
-                    <Typography variant="h5" gutterBottom>
-                      {currentLesson.title}
-                    </Typography>
-                    
-                    {currentLesson.type === 'video' && (
-                      <Box sx={{ position: 'relative', pb: '56.25%', height: 0, mb: 3 }}>
-                        <Box
-                          component="iframe"
-                          src={currentLesson.video_url || "https://www.youtube.com/embed/dQw4w9WgXcQ"}
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            border: 0,
-                            borderRadius: 1,
-                          }}
-                          allowFullScreen
-                        />
-                      </Box>
-                    )}
-                    
-                    {currentLesson.type === 'article' && (
-                      <Box sx={{ mb: 3 }}>
-                        <Typography variant="body1" paragraph>
-                          {currentLesson.content || "This article content will be displayed here. It could include text, images, and other media to help you learn about this topic."}
-                        </Typography>
-                        
-                        <Typography variant="body1" paragraph>
-                          Learning about agricultural practices is essential for sustainable farming. Understanding soil health, crop rotation, pest management, and water conservation can significantly improve farm productivity and environmental sustainability.
-                        </Typography>
-                        
-                        <Typography variant="body1" paragraph>
-                          Modern techniques like precision agriculture use technology to optimize resource use and increase yields while minimizing environmental impact. These approaches are becoming increasingly important as farmers face challenges from climate change and the need to feed a growing global population.
-                        </Typography>
-                      </Box>
-                    )}
-                    
-                    {currentLesson.type === 'quiz' && (
-                      <Box sx={{ mb: 3 }}>
-                        <Typography variant="body1" paragraph>
-                          Test your knowledge with this quiz on the topics covered in this lesson.
-                        </Typography>
-                        
-                        <Card variant="outlined" sx={{ mb: 2, p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>
-                            Question 1: What is the main benefit of crop rotation?
-                          </Typography>
-                          <Box sx={{ pl: 2 }}>
-                            <Typography variant="body2">A) Reduced pest pressure</Typography>
-                            <Typography variant="body2">B) Improved soil fertility</Typography>
-                            <Typography variant="body2">C) Prevention of soil erosion</Typography>
-                            <Typography variant="body2">D) All of the above</Typography>
-                          </Box>
-                        </Card>
-                        
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Button variant="contained" color="primary">
-                            Submit Quiz
-                          </Button>
-                        </Box>
-                      </Box>
-                    )}
-                    
-                    <Divider sx={{ my: 3 }} />
-                    
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Button variant="outlined">
-                        Previous Lesson
-                      </Button>
-                      <Button variant="contained" color="primary">
-                        Mark as Complete
-                      </Button>
-                      <Button variant="outlined">
-                        Next Lesson
-                      </Button>
-                    </Box>
-                  </>
-                ) : (
-                  <Typography variant="body1">
-                    Select a lesson from the list to start learning.
-                  </Typography>
-                )}
-              </Paper>
-            </Grid>
-          </Grid>
-        ) : (
-          <>
-            {/* Course preview content for non-enrolled users */}
-            <Paper sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-              <Box sx={{ mb: 3 }}>
-                <Tabs value={tabValue} onChange={handleTabChange}>
-                  <Tab label="Overview" />
-                  <Tab label="Curriculum" />
-                  <Tab label="Reviews" />
-                </Tabs>
-              </Box>
-              
-              <Box hidden={tabValue !== 0}>
-                <Typography variant="h6" gutterBottom>
-                  What you'll learn
-                </Typography>
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  {['Understand key agricultural principles', 'Apply sustainable farming techniques', 'Optimize crop yields', 'Implement effective soil management'].map((item, index) => (
-                    <Grid item xs={12} sm={6} key={index}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <Box
-                          component="span"
-                          sx={{
-                            mr: 1,
-                            width: 20,
-                            height: 20,
-                            borderRadius: '50%',
-                            bgcolor: 'primary.main',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 14,
-                          }}
-                        >
-                          ✓
-                        </Box>
-                        <Typography variant="body1">{item}</Typography>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-                
-                <Typography variant="h6" gutterBottom>
-                  Course Description
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  This comprehensive course will guide you through the fundamentals of agricultural practices, focusing on sustainable methods that improve crop yields while preserving environmental resources. Whether you're a beginner or looking to update your knowledge, this course provides practical insights you can apply immediately on your farm.
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  You'll learn from experienced farmers and agricultural experts who share real-world examples and case studies. The course combines theoretical knowledge with practical demonstrations to ensure you can implement what you learn.
-                </Typography>
-                
-                <Button 
-                  variant="contained" 
-                  color="primary" 
-                  size="large" 
-                  onClick={handleEnroll}
-                  disabled={isEnrolling}
-                  sx={{ mt: 2 }}
+            {course.modules && course.modules.length > 0 ? (
+              course.modules.map((module, index) => (
+                <Accordion 
+                  key={module.id} 
+                  defaultExpanded={index === 0}
+                  elevation={0}
+                  sx={{
+                    mb: 2,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px !important',
+                    overflow: 'hidden',
+                    '&:before': {
+                      display: 'none',
+                    },
+                    '&.Mui-expanded': {
+                      margin: '0 0 16px 0',
+                    }
+                  }}
                 >
-                  {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-                </Button>
-              </Box>
-              
-              <Box hidden={tabValue !== 1}>
-                <Typography variant="h6" gutterBottom>
-                  Course Content
-                </Typography>
-                
-                {lessons && lessons.length > 0 ? (
-                  lessons.map((section, index) => (
-                    <Accordion key={index}>
-                      <AccordionSummary 
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`section${index}-content`}
-                        id={`section${index}-header`}
-                      >
-                        <Typography>Section {index + 1}: {section.title}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <List dense>
-                          {section.lessons && section.lessons.map((lesson, i) => (
-                            <ListItem key={i}>
-                              <ListItemIcon>
-                                {lesson.type === 'video' ? <PlayCircleFilledIcon color="primary" /> : 
-                                 lesson.type === 'quiz' ? <QuizIcon color="secondary" /> : <ArticleIcon />}
-                              </ListItemIcon>
-                              <ListItemText 
-                                primary={lesson.title} 
-                                secondary={`${lesson.duration || '10 min'}`} 
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))
-                ) : (
-                  <Typography variant="body1">
-                    The curriculum for this course will be available soon.
-                  </Typography>
-                )}
-              </Box>
-              
-              <Box hidden={tabValue !== 2}>
-                <Typography variant="h6" gutterBottom>
-                  Student Reviews
-                </Typography>
-                
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h2" component="span" color="primary.main">
-                    4.8
-                  </Typography>
-                  <Typography variant="body1" component="span" sx={{ ml: 1 }}>
-                    out of 5
-                  </Typography>
-                </Box>
-                
-                {[
-                  { name: "John S.", rating: 5, comment: "Excellent course with practical advice I could apply right away on my farm." },
-                  { name: "Maria L.", rating: 4, comment: "Very informative. Could use more examples for small-scale farming." },
-                  { name: "Robert T.", rating: 5, comment: "The instructor is knowledgeable and explains concepts clearly." }
-                ].map((review, index) => (
-                  <Paper key={index} variant="outlined" sx={{ p: 2, mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Avatar sx={{ mr: 1, bgcolor: 'primary.main' }}>
-                        {review.name.charAt(0)}
-                      </Avatar>
-                      <Typography variant="subtitle1">
-                        {review.name}
+                  <AccordionSummary 
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls={`module${module.id}-content`}
+                    id={`module${module.id}-header`}
+                    sx={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                      '&.Mui-expanded': {
+                        minHeight: 56,
+                      }
+                    }}
+                  >
+                    <Box>
+                      <Typography fontWeight="600">
+                        Module {index + 1}: {module.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {module.lessons?.length || 0} lessons 
+                        • {module.lessons?.reduce((total, lesson) => total + (lesson.duration || 0), 0) || 0} minutes
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Box
-                          key={i}
-                          component="span"
-                          sx={{
-                            color: i < review.rating ? 'primary.main' : 'grey.400',
-                            mr: 0.5,
-                          }}
-                        >
-                          ★
-                        </Box>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ p: 0 }}>
+                    {module.description && (
+                      <Box sx={{ px: 3, pt: 2, pb: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {module.description}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    <List disablePadding sx={{ mt: 1 }}>
+                      {module.lessons && module.lessons.map((lesson, i) => (
+                        <React.Fragment key={lesson.id}>
+                          {i > 0 && <Divider component="li" />}
+                          <ListItem sx={{ pl: 3, py: 1.5 }}>
+                            <ListItemIcon sx={{ minWidth: 36 }}>
+                              {lesson.video_url ? 
+                                <PlayCircleFilledIcon color="primary" /> : 
+                                <ArticleIcon color="action" />
+                              }
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={lesson.title} 
+                              secondary={`${lesson.duration || 10} min`} 
+                              primaryTypographyProps={{ fontWeight: 500 }}
+                            />
+                          </ListItem>
+                        </React.Fragment>
                       ))}
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            ) : (
+              <Alert severity="info">
+                The curriculum for this course will be available soon.
+              </Alert>
+            )}
+          </Box>
+          
+          {/* Overview Tab */}
+          <Box hidden={tabValue !== 1} sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              What you'll learn
+            </Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {[
+                'Understand core principles and techniques',
+                'Apply practical knowledge in real-world scenarios',
+                'Develop problem-solving skills',
+                'Learn from industry experts'
+              ].map((item, index) => (
+                <Grid item xs={12} sm={6} key={index}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        mr: 1.5,
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        flexShrink: 0
+                      }}
+                    >
+                      ✓
                     </Box>
-                    <Typography variant="body1">
-                      {review.comment}
-                    </Typography>
-                  </Paper>
+                    <Typography variant="body1">{item}</Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+            
+            <Typography variant="h6" gutterBottom>
+              Course Description
+            </Typography>
+            <Typography variant="body1" paragraph>
+              {course.description}
+            </Typography>
+            <Typography variant="body1" paragraph>
+              This course is designed for both beginners and experienced practitioners. You'll learn through 
+              video lectures, hands-on exercises, and real-world case studies.
+            </Typography>
+            
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Requirements
+              </Typography>
+              <List>
+                {[
+                  'No prior knowledge required',
+                  'Basic understanding of agriculture is helpful but not mandatory',
+                  'Willingness to apply learned concepts in practice'
+                ].map((item, index) => (
+                  <ListItem key={index} sx={{ py: 0.5 }}>
+                    <ListItemText 
+                      primary={`• ${item}`}
+                      primaryTypographyProps={{ variant: 'body1' }}
+                    />
+                  </ListItem>
                 ))}
-              </Box>
-            </Paper>
-          </>
-        )}
+              </List>
+            </Box>
+          </Box>
+          
+          {/* Instructor Tab */}
+          <Box hidden={tabValue !== 2} sx={{ p: 3 }}>
+            {course.instructor ? (
+              <>
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: { xs: 'column', sm: 'row' }, 
+                    alignItems: { xs: 'center', sm: 'flex-start' },
+                    mb: 4
+                  }}
+                >
+                  <Avatar 
+                    sx={{ 
+                      width: 120, 
+                      height: 120, 
+                      mr: { xs: 0, sm: 3 },
+                      mb: { xs: 2, sm: 0 },
+                      bgcolor: 'primary.main',
+                      fontSize: '2.5rem'
+                    }}
+                  >
+                    {course.instructor.first_name.charAt(0)}
+                  </Avatar>
+                  
+                  <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
+                    <Typography variant="h5" gutterBottom>
+                      {course.instructor.first_name} {course.instructor.last_name}
+                    </Typography>
+                    
+                    <Typography variant="subtitle1" color="primary.main" gutterBottom sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', sm: 'flex-start' } }}>
+                      <VerifiedIcon fontSize="small" sx={{ mr: 1 }} />
+                      {course.instructor.user_type === 'expert' ? 'Agricultural Expert' : 'Instructor'}
+                    </Typography>
+                    
+                    <Typography variant="body1" paragraph>
+                      Specializing in sustainable agricultural practices with over 10 years of experience in 
+                      the field. Passionate about educating farmers on modern techniques and environmental stewardship.
+                    </Typography>
+                    
+                    <Stack direction="row" spacing={2} justifyContent={{ xs: 'center', sm: 'flex-start' }}>
+                      <Chip label="Sustainable Farming" />
+                      <Chip label="Crop Management" />
+                      <Chip label="Agricultural Education" />
+                    </Stack>
+                  </Box>
+                </Box>
+                
+                <Divider sx={{ my: 3 }} />
+                
+                <Typography variant="h6" gutterBottom>
+                  About the Instructor
+                </Typography>
+                
+                <Typography variant="body1" paragraph>
+                  {course.instructor.first_name} has dedicated their career to advancing sustainable agricultural 
+                  practices and sharing knowledge with farmers across Kenya. With a background in Agricultural 
+                  Sciences and years of field experience, they bring both theoretical knowledge and practical 
+                  insights to their courses.
+                </Typography>
+                
+                <Typography variant="body1" paragraph>
+                  As a recognized expert in the field, they have helped hundreds of farmers implement effective 
+                  techniques that increase yields while preserving environmental resources. Their teaching methodology 
+                  focuses on applicable skills that can be immediately implemented on any farm.
+                </Typography>
+              </>
+            ) : (
+              <Alert severity="info">
+                Information about the instructor will be available soon.
+              </Alert>
+            )}
+          </Box>
+        </Paper>
       </Box>
     </Container>
   );

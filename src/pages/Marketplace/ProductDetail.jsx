@@ -3,7 +3,7 @@ import {
   Box, Typography, Grid, Paper, Button, Chip, Divider, TextField,
   Avatar, Alert, Backdrop, CircularProgress, List, ListItem,
   ListItemText, ListItemAvatar, Card, CardMedia, useTheme, useMediaQuery,
-  Stack, Table, TableBody, TableRow, TableCell
+  Stack, Table, TableBody, TableRow, TableCell, Snackbar
 } from '@mui/material';
 import {
   Place as PlaceIcon,
@@ -14,9 +14,12 @@ import {
   ShoppingCart as ShoppingCartIcon,
   HourglassEmpty as ExpiryIcon,
   Star as StarIcon,
-  LocalShipping as ShippingIcon
+  LocalShipping as ShippingIcon,
+  CheckCircle as CheckCircleIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   useGetProductByIdQuery,
   useGetProductsQuery,
@@ -24,10 +27,15 @@ import {
 } from '../../features/marketplace/marketplaceApi';
 import Loader from '../../components/common/Loader';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { addToCart } from '../../features/cart/cartSlice'; 
+
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [showSnackbar, setShowSnackbar] = useState(false);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { data: product, isLoading, error } = useGetProductByIdQuery(id);
@@ -85,7 +93,28 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    console.log(`Added ${quantity} ${product.unit} of ${product.title} to cart`);
+    // Create a cart item from product data
+    const cartItem = {
+      id: product.id,
+      title: product.title,
+      price_per_unit: product.price_per_unit,
+      unit: product.unit,
+      quantity: quantity,
+      image: primaryImage,
+      seller: product.seller,
+      crop: product.crop,
+      crop_details: product.crop_details
+    };
+    
+    // Dispatch to add the item to cart
+    dispatch(addToCart(cartItem));
+    
+    // Show success message
+    setShowSnackbar(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setShowSnackbar(false);
   };
 
   const totalPrice = (parseFloat(product.price_per_unit) * quantity).toFixed(2);
@@ -96,6 +125,24 @@ const ProductDetail = () => {
       <Backdrop open={isOrdering} sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <CircularProgress color="primary" />
       </Backdrop>
+
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        message={
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <CheckCircleIcon sx={{ mr:.5 }} />
+            Item added to your cart!
+          </Box>
+        }
+        action={
+          <Button color="primary" size="small" onClick={() => navigate('/marketplace/cart')}>
+            VIEW CART
+          </Button>
+        }
+      />
+
 
       <Box sx={{ mb: 4 }}>
         <Button 
