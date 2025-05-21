@@ -34,36 +34,36 @@ const Home = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
-  const features = [
-    {
-      title: "Smart Crop Recommendations",
-      description: "Get AI-powered crop suggestions based on your soil data and local climate conditions.",
-      icon: <GrassIcon fontSize="large" style={{ color: '#4CAF50' }} />,
-      link: "/recommendations",
-      color: alpha('#4CAF50', 0.1)
-    },
-    {
-      title: "Digital Marketplace",
-      description: "Buy and sell agricultural products directly without intermediaries.",
-      icon: <StoreIcon fontSize="large" style={{ color: '#2196F3' }} />,
-      link: "/marketplace",
-      color: alpha('#2196F3', 0.1)
-    },
-    {
-      title: "Farmer Community",
-      description: "Connect with other farmers to share knowledge and experiences.",
-      icon: <GroupsIcon fontSize="large" style={{ color: '#FF9800' }} />,
-      link: "/community",
-      color: alpha('#FF9800', 0.1)
-    },
-    {
-      title: "Learning Resources",
-      description: "Access courses and resources to improve your farming techniques.",
-      icon: <SchoolIcon fontSize="large" style={{ color: '#9C27B0' }} />,
-      link: "/learning",
-      color: alpha('#9C27B0', 0.1)
-    }
-  ];
+const features = [
+  {
+    title: "Smart Crop Recommendations",
+    description: "Get AI-powered crop suggestions based on your soil data, local climate conditions, and historical yield patterns. Our algorithms analyze multiple factors to optimize your planting decisions.",
+    icon: <GrassIcon fontSize="large" style={{ color: '#4CAF50' }} />,
+    link: "/recommendations",
+    color: alpha('#4CAF50', 0.1)
+  },
+  {
+    title: "Digital Marketplace",
+    description: "Buy and sell agricultural products directly without intermediaries. Connect with buyers and sellers across the region, negotiate fair prices, and expand your market reach significantly.",
+    icon: <StoreIcon fontSize="large" style={{ color: '#2196F3' }} />,
+    link: "/marketplace",
+    color: alpha('#2196F3', 0.1)
+  },
+  {
+    title: "Farmer Community",
+    description: "Connect with other farmers to share knowledge, experiences, and best practices. Ask questions, participate in discussions, and learn from agricultural experts in our supportive community.",
+    icon: <GroupsIcon fontSize="large" style={{ color: '#FF9800' }} />,
+    link: "/community",
+    color: alpha('#FF9800', 0.1)
+  },
+  {
+    title: "Learning Resources",
+    description: "Access courses and resources to improve your farming techniques. Our educational content covers everything from soil management to financial planning for successful agricultural enterprises.",
+    icon: <SchoolIcon fontSize="large" style={{ color: '#9C27B0' }} />,
+    link: "/learning",
+    color: alpha('#9C27B0', 0.1)
+  }
+];
 
   const benefits = [
     { 
@@ -268,10 +268,13 @@ const Home = () => {
                 md={3}
                 sx={{
                   py: 3,
+                  mx: 2,
+                 
                   display: 'flex',
                   justifyContent: 'center',
                   borderRight: { 
-                    xs: 'none', 
+                    xs: 'none',
+
                     md: index !== 3 ? `1px solid ${alpha(theme.palette.divider, 0.5)}` : 'none' 
                   },
                   borderBottom: { 

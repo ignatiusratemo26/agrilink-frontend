@@ -1,0 +1,6 @@
+AgriLink: AI-Powered Crop Recommendations and Web3-Enabled Marketplace for African Farmers
+AgriLink is a data-driven agricultural platform developed to empower African farmers through personalized crop recommendations, direct access to buyers, and secure Web3-enabled payments. By integrating machine learning, AgriLink analyzes soil and climate data to recommend optimal crops, boosting productivity and sustainability.
+The platform has an online marketplace where farmers list produce and negotiate contracts with buyers. To reduce fraud and build trust, we leverage the Ethereum blockchain to power decentralized escrow-based payments, allowing funds to be securely held and released only upon delivery confirmation.
+AgriLink also includes a learning portal to support farmer collaboration and continuous education.
+Focusing on scalability, transparency, and local empowerment, AgriLink shows how AI and blockchain can be harnessed to solve real-world problems in agriculture while promoting economic growth in Africa.
+
