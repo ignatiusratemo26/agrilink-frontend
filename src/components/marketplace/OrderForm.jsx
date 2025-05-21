@@ -359,11 +359,11 @@ const OrderForm = ({
                     label="Select Payment Method"
                     disabled={loading}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                  >
+                  > <MenuItem value="crypto">Cryptocurrency (Ethereum)</MenuItem>
                     <MenuItem value="mobile">Mobile Money (M-Pesa, Airtel Money)</MenuItem>
                     <MenuItem value="card">Credit/Debit Card</MenuItem>
                     <MenuItem value="cash">Cash on Delivery</MenuItem>
-                    <MenuItem value="crypto">Cryptocurrency (Ethereum)</MenuItem>
+                    
                   </Select>
                 </FormControl>
                 

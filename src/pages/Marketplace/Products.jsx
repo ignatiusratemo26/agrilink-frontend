@@ -18,7 +18,8 @@ import {
   ListItemText,
   ListItemAvatar,
   Avatar,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -84,6 +85,13 @@ const Products = () => {
           : item
       )
     );
+  };
+  
+  const handleQuantityChange = (e, productId) => {
+    const newQuantity = parseInt(e.target.value);
+    if (!isNaN(newQuantity)) {
+      updateCartItemQuantity(productId, newQuantity);
+    }
   };
   
   const handleCheckout = () => {
@@ -155,12 +163,6 @@ const Products = () => {
                     </IconButton>
                   }
                 >
-                  <ListItemAvatar>
-                    <Avatar 
-                      src={item.image || 'https://via.placeholder.com/40'} 
-                      variant="rounded"
-                    />
-                  </ListItemAvatar>
                   <ListItemText
                     primary={item.title}
                     secondary={
@@ -176,7 +178,17 @@ const Products = () => {
                           >
                             -
                           </Button>
-                          <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
+                          <TextField
+                            size="small"
+                            value={item.quantity}
+                            onChange={(e) => handleQuantityChange(e, item.id)}
+                            inputProps={{ 
+                              min: 1, 
+                              style: { textAlign: 'center', padding: '2px', width: '40px' } 
+                            }}
+                            variant="standard"
+                            sx={{ mx: 1 }}
+                          />
                           <Button 
                             size="small" 
                             variant="outlined"
@@ -184,6 +196,9 @@ const Products = () => {
                           >
                             +
                           </Button>
+                          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                            {item.unit}
+                          </Typography>
                         </Box>
                       </Box>
                     }
