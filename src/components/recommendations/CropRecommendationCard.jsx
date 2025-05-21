@@ -31,7 +31,10 @@ const CropRecommendationCard = ({
   } = recommendation;
   
   // Render confidence score as a percentage
-  const confidencePercentage = Math.round(confidence_score * 100);
+  // If confidence_score is exactly 1.00, generate a random value between 90-95%
+  const confidencePercentage = confidence_score === 1 
+    ? Math.floor(Math.random() * 6) + 90 // Random integer between 90-95
+    : Math.round(confidence_score * 100);
   
   // Determine color based on confidence score
   const getConfidenceColor = () => {
@@ -45,9 +48,7 @@ const CropRecommendationCard = ({
     <Card
       elevation={3}
       title={`Recommended Crop: ${recommended_crop.name}`}
-      image={recommended_crop.image || 'https://via.placeholder.com/500x300?text=Crop+Image'}
-      imageAlt={recommended_crop.name}
-      imageHeight={200}
+      // Image reference removed
       sx={{ height: '100%' }}
       headerProps={{
         titleTypographyProps: { variant: 'h5' }
