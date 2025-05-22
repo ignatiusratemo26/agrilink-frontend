@@ -50,6 +50,7 @@ const BuyerProfile = lazy(() => import('../pages/Profile/BuyerProfile'));
 // Other Pages
 const Home = lazy(() => import('../pages/Home'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+const Pricing = lazy(() => import('../pages/Pricing'));
 
 // Auth guard component
 const RequireAuth = ({ children }) => {
@@ -126,6 +127,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: '/', element: withSuspense(Home) },
+      { path: '/pricing', element: withSuspense(Pricing) },
     ]
   },
   {

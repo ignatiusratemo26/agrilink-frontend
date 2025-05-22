@@ -41,6 +41,8 @@ import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { checkTokenValidity } from '../../features/auth/authSlice';
+import PaidIcon from '@mui/icons-material/Paid';
+
 
 const Navbar = () => {
   const theme = useTheme();
@@ -89,6 +91,7 @@ const Navbar = () => {
     { text: 'Learning', icon: <SchoolIcon />, link: '/learning' },
     { text: 'Community', icon: <ForumIcon />, link: '/community' },
     { text: 'Contracts', icon: <HandshakeIcon />, link: '/contracts' },
+    { text: 'Pricing', icon: <PaidIcon />, link: '/pricing' },
   ];
 
   // Get active route for highlighting
@@ -185,6 +188,19 @@ const Navbar = () => {
           
           {!isAuthenticated ? (
             <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  component={RouterLink}
+                  to="/pricing"
+                  color="inherit"
+                  startIcon={<PaidIcon />}
+                  sx={{ 
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 500
+                  }}
+                >
+                  Pricing
+                </Button>
               <Button
                 component={RouterLink}
                 to="/login"
