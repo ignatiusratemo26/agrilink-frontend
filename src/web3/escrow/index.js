@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import EscrowABI from "./EscrowABI.json";
 
 // Replace this with your deployed contract address
-contract_address= import.meta.env.CONTRACT_ADDRESS || "0x2b1bf6d44777f787a930ac3167a3a65a83a3913d";
+contract_address= import.meta.env.VITE_CONTRACT_ADDRESS;
 
 
 export function getEscrowContract(signerOrProvider) {

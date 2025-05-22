@@ -13,7 +13,7 @@ import { useWeb3 } from "../../web3/Web3Provider";
 import { ethers } from "ethers";
 import EscrowABI from "../../web3/escrow/EscrowABI.json";
 
-const ESCROW_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || "0x2b1bf6d44777f787a930ac3167a3a65a83a3913d";
+const ESCROW_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 const CryptoPayment = ({ sellerAddress, amountETH, onPaymentComplete }) => {
   const { wallet, connectWallet } = useWeb3();
