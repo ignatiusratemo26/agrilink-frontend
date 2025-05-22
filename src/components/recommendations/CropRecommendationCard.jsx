@@ -100,22 +100,22 @@ const CropRecommendationCard = ({
         </Typography>
         
         <Grid container spacing={1} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Typography variant="body2" color="text.secondary">
               Growing Season
             </Typography>
             <Typography variant="body1">
               {growing_season || 'Not specified'}
             </Typography>
-          </Grid>
-          <Grid item xs={6}>
+          </Grid> */}
+          {/* <Grid item xs={6}>
             <Typography variant="body2" color="text.secondary">
               Average Yield
             </Typography>
             <Typography variant="body1">
               {average_yield ? `${average_yield} tons/acre` : 'Not specified'}
             </Typography>
-          </Grid>
+          </Grid> */}
         </Grid>
         
         <Typography variant="body1" paragraph>
